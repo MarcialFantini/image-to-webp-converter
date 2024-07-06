@@ -4,12 +4,13 @@ import "./App.css";
 import { useDropzone } from "react-dropzone";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
-function App() {
-  const [files, setFiles] = useState([]);
-  const [webpFiles, setWebpFiles] = useState([]);
 
-  const onDrop = (acceptedFiles) => {
-    setFiles([...files, ...acceptedFiles]);
+function App() {
+  const [files, setFiles] = useState<File[]>([]);
+  const [webpFiles, setWebpFiles] = useState<Blob[]>([]);
+
+  const onDrop = (acceptedFiles: File[]) => {
+    setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
   };
 
   const convertToWebP = async () => {
@@ -36,8 +37,11 @@ function App() {
 
   const downloadAll = async () => {
     const zip = new JSZip();
+    const folder = zip.folder("webp_images");
     webpFiles.forEach((file, index) => {
-      zip.file(`image-${index}.webp`, file);
+      if (folder) {
+        folder.file(`image-${index}.webp`, file);
+      }
     });
 
     const content = await zip.generateAsync({ type: "blob" });
@@ -46,7 +50,6 @@ function App() {
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
-    accept: "image/*",
   });
 
   return (
